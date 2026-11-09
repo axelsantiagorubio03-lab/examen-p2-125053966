@@ -1,0 +1,8 @@
+*.csv
+.env
+__pycache__/
+*.pyc
+mapreduce/output/
+ventas_125053966.csv
+__pycache__/
+.env

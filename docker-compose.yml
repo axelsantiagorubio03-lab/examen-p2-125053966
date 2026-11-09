@@ -1,0 +1,51 @@
+version: '3.8'
+
+networks:
+  datamart_net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  sshdata:
+
+services:
+  hadoop:
+    build:
+      context: ./hadoop
+    container_name: hadoop
+    networks:
+      - datamart_net
+    volumes:
+      - ./:/data/input:ro
+      - ./mapreduce:/app/mapreduce
+      - ./scripts:/app/scripts
+      - sshdata:/root/.ssh
+    command: tail -f /dev/null
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    networks:
+      - datamart_net
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build:
+      context: ./api
+    container_name: api
+    networks:
+      - datamart_net
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./api:/app
+      - sshdata:/root/.ssh:ro
